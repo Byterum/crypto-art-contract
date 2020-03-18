@@ -1,0 +1,311 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.1",
+    "types": [
+        {
+            "new_type_name": "global_id",
+            "type": "uint128"
+        },
+        {
+            "new_type_name": "id_type",
+            "type": "uint64"
+        },
+        {
+            "new_type_name": "uri_type",
+            "type": "string"
+        }
+    ],
+    "structs": [
+        {
+            "name": "account",
+            "base": "",
+            "fields": [
+                {
+                    "name": "balance",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "burn",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "uuid",
+                    "type": "global_id"
+                },
+                {
+                    "name": "memo",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "controltoken",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "id_type"
+                },
+                {
+                    "name": "levers_num",
+                    "type": "uint64"
+                },
+                {
+                    "name": "isSetup",
+                    "type": "bool"
+                },
+                {
+                    "name": "master_token_id",
+                    "type": "id_type"
+                },
+                {
+                    "name": "min_values",
+                    "type": "int64[]"
+                },
+                {
+                    "name": "max_values",
+                    "type": "int64[]"
+                },
+                {
+                    "name": "curr_values",
+                    "type": "int64[]"
+                }
+            ]
+        },
+        {
+            "name": "create",
+            "base": "",
+            "fields": [
+                {
+                    "name": "issuer",
+                    "type": "name"
+                },
+                {
+                    "name": "maximum_supply",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "mintartwork",
+            "base": "",
+            "fields": [
+                {
+                    "name": "to",
+                    "type": "name"
+                },
+                {
+                    "name": "uri",
+                    "type": "string"
+                },
+                {
+                    "name": "collaborators",
+                    "type": "name[]"
+                }
+            ]
+        },
+        {
+            "name": "setrampayer",
+            "base": "",
+            "fields": [
+                {
+                    "name": "payer",
+                    "type": "name"
+                },
+                {
+                    "name": "id",
+                    "type": "id_type"
+                }
+            ]
+        },
+        {
+            "name": "setuptoken",
+            "base": "",
+            "fields": [
+                {
+                    "name": "token_id",
+                    "type": "id_type"
+                },
+                {
+                    "name": "min_values",
+                    "type": "int64[]"
+                },
+                {
+                    "name": "max_values",
+                    "type": "int64[]"
+                },
+                {
+                    "name": "curr_values",
+                    "type": "int64[]"
+                }
+            ]
+        },
+        {
+            "name": "stat",
+            "base": "",
+            "fields": [
+                {
+                    "name": "issuer",
+                    "type": "name"
+                },
+                {
+                    "name": "supply",
+                    "type": "asset"
+                },
+                {
+                    "name": "issued",
+                    "type": "asset"
+                },
+                {
+                    "name": "max_supply",
+                    "type": "asset"
+                },
+                {
+                    "name": "infinite",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "token",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "id_type"
+                },
+                {
+                    "name": "uuid",
+                    "type": "global_id"
+                },
+                {
+                    "name": "uri",
+                    "type": "uri_type"
+                },
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "value",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "transfer",
+            "base": "",
+            "fields": [
+                {
+                    "name": "from",
+                    "type": "name"
+                },
+                {
+                    "name": "to",
+                    "type": "name"
+                },
+                {
+                    "name": "token_id",
+                    "type": "id_type"
+                },
+                {
+                    "name": "memo",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "updatetoken",
+            "base": "",
+            "fields": [
+                {
+                    "name": "token_id",
+                    "type": "id_type"
+                },
+                {
+                    "name": "lever_ids",
+                    "type": "int64[]"
+                },
+                {
+                    "name": "new_values",
+                    "type": "int64[]"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "burn",
+            "type": "burn",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "create",
+            "type": "create",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "mintartwork",
+            "type": "mintartwork",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setrampayer",
+            "type": "setrampayer",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setuptoken",
+            "type": "setuptoken",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "transfer",
+            "type": "transfer",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "updatetoken",
+            "type": "updatetoken",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [
+        {
+            "name": "accounts",
+            "type": "account",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "ctltokens",
+            "type": "controltoken",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "stats",
+            "type": "stat",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "tokens",
+            "type": "token",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        }
+    ],
+    "ricardian_clauses": [],
+    "variants": []
+}
