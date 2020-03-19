@@ -283,8 +283,7 @@ private:
   token_index tokens;
   control_token_table control_tokens;
 
-  string normal_nft_sym = "NORMAL";
-  string programmable_nft_sym = "PROGRAM";
+  string art_symbol = "ART";
 
   void sub_balance(name owner, asset value);
   void add_balance(name owner, asset value, name ram_payer);
@@ -303,4 +302,6 @@ private:
    */
   id_type _safemint(name to, string symbol, string uri, string memo);
   id_type _mint(name owner, asset value, string uri);
+
+  void verify_uri(string uri);
 };

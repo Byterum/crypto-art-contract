@@ -220,14 +220,11 @@ ACTION cryptoart::setuptoken(id_type token_id, vector<int64_t> min_values,
 }
 
 ACTION cryptoart::mintartwork(name to, string uri, vector<name> collaborators) {
-  bool isProgrammable = collaborators.size() != 0;
-  string target_symbol = isProgrammable ? programmable_nft_sym : normal_nft_sym;
-  name issuer = get_issuer(symbol_code(target_symbol));
+  name issuer = get_issuer(symbol_code(art_symbol));
   require_auth(issuer);
   // issue master layer token
-  id_type master_token_id =
-      _safemint(to, target_symbol, "mobius://crypto.art/ART/normal?uri=" + uri,
-                string(""));
+  id_type master_token_id = _safemint(
+      to, art_symbol, "mobius://crypto.art/ART/master?ipfs=" + uri, string(""));
   control_tokens.emplace(issuer, [&](auto &r) {
     // `token_id` and `master_token_id` are the same in master token
     r.id = master_token_id;
@@ -235,21 +232,18 @@ ACTION cryptoart::mintartwork(name to, string uri, vector<name> collaborators) {
     r.levers_num = 0;
     r.isSetup = true;
   });
-  if (isProgrammable) {
-    // issue layer token to initial collaborators
-    for (int i = 0; i < collaborators.size(); i++) {
-      name collaborator = collaborators[i];
-      id_type token_id =
-          _safemint(collaborator, programmable_nft_sym,
-                    "mobius://crypto.art/ART/programmable?master=" +
-                        to_string(master_token_id),
-                    string(""));
-      control_tokens.emplace(issuer, [&](auto &r) {
-        r.id = token_id;
-        r.isSetup = false;
-        r.master_token_id = master_token_id;
-      });
-    }
+  // issue layer token to initial collaborators
+  for (int i = 0; i < collaborators.size(); i++) {
+    name collaborator = collaborators[i];
+    id_type token_id = _safemint(collaborator, art_symbol,
+                                 "mobius://crypto.art/ART/layer?master=" +
+                                     to_string(master_token_id),
+                                 string(""));
+    control_tokens.emplace(issuer, [&](auto &r) {
+      r.id = token_id;
+      r.isSetup = false;
+      r.master_token_id = master_token_id;
+    });
   }
 }
 
