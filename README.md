@@ -12,11 +12,12 @@ We use `ART` as token symbol for cryptoart.
 
 ### 2. Call `mintartwork` to issue your art
 
-The artist need to specify the uri of master token(usually IPFS cid of config data in JSON) to tell the [render](https://github.com/MobiusGame/crypto-art-render) how to cooperate with other layers to paint the final artwork at frontend.
+What the artists need to do:
 
-The artist alse have to pass multiple collaborators to hold sub-layer tokens.
+- Specify the uri of master token(usually IPFS cid of config data in JSON) to tell the [render](https://github.com/MobiusGame/crypto-art-render) how to cooperate with other layers to paint the final artwork at frontend.
+- pass multiple collaborators to hold sub-layer tokens. Those collaborators will be the first owner of these layer tokens.
 
-This action will issue NFTs to the specifed account, and after issuing, token holder can make effect on artwork by updating their layer token values.
+This action will issue NFTs to the specifed accounts, and after issuing, token holders can make effect on artwork by seting up and updating their layer tokens.
 
 At mobius crypto art, **we force all artworks only support IPFS storage network** to make them **decentralized**. The upper layers can also cache the buffer from IPFS (or other network following IPFS protocol) for more efficient loading.
 
