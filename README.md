@@ -18,7 +18,7 @@ The artist alse have to pass multiple collaborators to hold sub-layer tokens.
 
 This action will issue NFTs to the specifed account, and after issuing, token holder can make effect on artwork by updating their layer token values.
 
-At mobius crypto art, **we force all artworks only support IPFS storage network** to make more **decentralized**. The upper layers can also cache the buffer from IPFS for more efficient loading.
+At mobius crypto art, **we force all artworks only support IPFS storage network** to make them **decentralized**. The upper layers can also cache the buffer from IPFS (or other network following IPFS protocol) for more efficient loading.
 
 - For artwork with only 1 master, which often treated as normal artwork, its valid uri format is `mobius://crypto.art/ART/master?ipfs=${cid}`.
 - For artwork with 1 master and multiple layers, its valid uri format is below:
