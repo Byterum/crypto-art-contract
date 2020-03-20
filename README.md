@@ -6,7 +6,7 @@ Inspired by [async.art](https://async.art/).
 
 ## How to use
 
-### 1. Create two basic artwork token symbol
+### 1. Create artwork token symbol `ART`
 
 We use `ART` as token symbol for cryptoart.
 
