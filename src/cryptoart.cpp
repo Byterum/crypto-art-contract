@@ -62,7 +62,6 @@ id_type cryptoart::_safemint(name to, string symbol, string uri, string memo) {
 
 ACTION cryptoart::transfer(name from, name to, id_type token_id, string memo) {
   // Ensure authorized to send from account
-  check(from != to, "cannot transfer to self");
   require_auth(from);
 
   // Ensure 'to' account exists
@@ -273,5 +272,82 @@ ACTION cryptoart::updatetoken(id_type token_id, vector<int64_t> lever_ids,
                         [&](auto &r) { r.curr_values = values; });
 }
 
-EOSIO_DISPATCH(cryptoart,
-               (create)(transfer)(burn)(setuptoken)(updatetoken)(mintartwork))
+void cryptoart::payeos(name from, name to, asset quantity, string memo) {
+  if (to != get_self()) {
+    print("receiver should be the contract account");
+    return;
+  }
+  if (from == to) {
+    print("cannot pay to self");
+    return;
+  };
+  if (quantity.symbol != symbol("EOS", 4)) {
+    print("only accept EOS");
+    return;
+  }
+  // memo format is "auction:${token_id}"
+  size_t div_pos = memo.find(":");
+  string type = memo.substr(0, div_pos);
+  id_type token_id = atoll(memo.substr(div_pos + 1, memo.size()).c_str());
+  if (type == "bid") {
+    bid(from, token_id, quantity);
+  }
+}
+
+ACTION cryptoart::auctiontoken(id_type token_id, asset min_price) {
+  name owner = get_owner_by_id(token_id);
+  // require auth of token owner.
+  require_auth(owner);
+  check(min_price.amount > 0, "minimum bid price should be positive");
+  check(min_price.symbol == symbol("EOS", 4), "only support EOS token");
+  auction_index auction(get_self(), get_self().value);
+  auto itr = auction.find(token_id);
+  if (itr == auction.end()) {
+    // if first auction, append to the auction list.
+    auction.emplace(owner, [&](auto &r) {
+      r.id = token_id;
+      r.bidder = owner;
+      r.curr_price = min_price;
+      r.status = 0;
+    });
+  } else if (itr->status == 1) {
+    // if not first auction, reopen auction.
+    auction.modify(itr, owner, [&](auto &r) {
+      r.bidder = owner;
+      r.curr_price = min_price;
+      r.status = 0;
+    });
+  }
+}
+
+void cryptoart::bid(name bidder, id_type token_id, asset price) {
+  auction_index auction(get_self(), get_self().value);
+  const auto &record = auction.get(token_id, "token is not in auction");
+  check(price > record.curr_price,
+        "bid value should be larger than current price");
+  auction.modify(record, same_payer, [&](auto &r) {
+    r.bidder = bidder;
+    r.curr_price = price;
+  });
+}
+
+ACTION cryptoart::acceptbid(id_type token_id) {
+  // check ownership
+  const auto &token = tokens.get(token_id, "token not found");
+  require_auth(token.owner);
+  auction_index auction(get_self(), get_self().value);
+  const auto &record = auction.get(token_id, "token is not in auction");
+  check(record.status == 0, "auction is closed");
+  // close the auction.
+  auction.modify(record, same_payer, [&](auto &r) { r.status = 1; });
+  // transfer EOS to token owner.
+  if (token.owner != get_self()) {
+    action(permission_level(get_self(), "active"_n), "eosio.token"_n,
+           "transfer"_n,
+           make_tuple(get_self(), token.owner, record.curr_price,
+                      string("acceptbid")))
+        .send();
+  }
+  // transfer artwork
+  tokens.modify(token, token.owner, [&](auto &r) { r.owner = record.bidder; });
+}

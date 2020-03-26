@@ -6,27 +6,27 @@ Inspired by [async.art](https://async.art/).
 
 ## How to use
 
-### 1. Create artwork token symbol `ART`
+### 1. Create two basic artwork token symbol
 
-We use `ART` as token symbol for cryptoart.
+We design two different token symbol to tell the normal artworks and programmable artworks.
+
+- `NORMAL` - means normal artwork token with only 1 **master** layer.
+- `PROGRAM` - means programmable artwork token with 1 master layer and multiple sub layers controlled by other token-holders.
 
 ### 2. Call `mintartwork` to issue your art
 
-What the artists need to do:
+The artist need to specify the uri of master token(usually IPFS cid of config data in JSON) to tell the [render](https://github.com/MobiusGame/crypto-art-render) how to cooperate with other layers to paint the final artwork at frontend.
 
-- Specify the uri of master token(usually IPFS cid of config data in JSON) to tell the [render](https://github.com/MobiusGame/crypto-art-render) how to cooperate with other layers to paint the final artwork at frontend.
-- pass multiple collaborators to hold sub-layer tokens. Those collaborators will be the first owner of these layer tokens.
+The artist alse have to pass multiple collaborators to hold sub-layer tokens.
 
-This action will issue NFTs to the specifed accounts, and after issuing, token holders can make effect on artwork by seting up and updating their layer tokens.
+This action will issue NFTs to the specifed account, and after issuing, token holder can make effect on artwork by updating their layer token values.
 
-At mobius crypto art, **we force all artworks only support IPFS storage network** to make them **decentralized**. The upper layers can also cache the buffer from IPFS (or other network following IPFS protocol) for more efficient loading.
+At mobius crypto art, **we force all artworks only support IPFS storage network** to make more **decentralized**. The upper layers can also cache the buffer from IPFS for more efficient loading.
 
-- For artwork with only 1 master, which often treated as normal artwork, its valid uri format is `mobius://crypto.art/ART/master?ipfs=${cid}`.
-- For artwork with 1 master and multiple layers, its valid uri format is below:
-  - Master Token: the same as above.
-  - Layer Token: `mobius://crypto.art/ART/layer?master=${master_token_id}`, which will be generated automatically when mint artwork.
-
-URI format follows the rule of [THE-OASIS URI Design](https://github.com/MobiusGame/nft-resolver#nft-%E5%85%83%E6%95%B0%E6%8D%AEmeta-data). To resolve URI more friendly, we recommand you to use [nft-resolver](https://github.com/MobiusGame/nft-resolver) SDK to decode the URI as object in Typescript.
+- For `NORMAL` artwork, the valid uri format is `mobius://crypto.art/ART/normal/ipfs/${cid}`.
+- For `PROGRAM` artwork, the valid uri format is below:
+  - Master Token: `mobius://crypto.art/ART/programmable/ipfs/${cid}`
+  - Layer Token: `mobius://crypto.art/ART/programmable?master=${master_token_id}`, which will be generated automatically when mint artwork.
 
 ### 3. Call `setuptoken` to setup the control token
 

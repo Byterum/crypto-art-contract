@@ -17,11 +17,57 @@
     ],
     "structs": [
         {
+            "name": "acceptbid",
+            "base": "",
+            "fields": [
+                {
+                    "name": "token_id",
+                    "type": "id_type"
+                }
+            ]
+        },
+        {
             "name": "account",
             "base": "",
             "fields": [
                 {
                     "name": "balance",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "auction",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "id_type"
+                },
+                {
+                    "name": "bidder",
+                    "type": "name"
+                },
+                {
+                    "name": "curr_price",
+                    "type": "asset"
+                },
+                {
+                    "name": "status",
+                    "type": "int32"
+                }
+            ]
+        },
+        {
+            "name": "auctiontoken",
+            "base": "",
+            "fields": [
+                {
+                    "name": "token_id",
+                    "type": "id_type"
+                },
+                {
+                    "name": "min_price",
                     "type": "asset"
                 }
             ]
@@ -241,6 +287,16 @@
     ],
     "actions": [
         {
+            "name": "acceptbid",
+            "type": "acceptbid",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "auctiontoken",
+            "type": "auctiontoken",
+            "ricardian_contract": ""
+        },
+        {
             "name": "burn",
             "type": "burn",
             "ricardian_contract": ""
@@ -280,6 +336,13 @@
         {
             "name": "accounts",
             "type": "account",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "auction",
+            "type": "auction",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

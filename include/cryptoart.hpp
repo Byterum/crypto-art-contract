@@ -80,6 +80,31 @@ public:
                      vector<int64_t> new_values);
 
   /**
+   * Add a token to auction list. This action can be called only by token
+  holder.
+   * @param token_id - Token unique id
+   * @param min_price - Minimum price
+   */
+  ACTION auctiontoken(id_type token_id, asset min_price);
+
+  /**
+   * Bid a control token. Internal function
+   * @param bidder - Token bidder account
+   * @param token_id - Token unique id
+   * @param price - Bid value
+   */
+  void bid(name bidder, id_type token_id, asset price);
+
+  /**
+   * Accept the final bid and sell token.
+   * @param token_id - Token unique id
+   */
+  ACTION acceptbid(id_type token_id);
+
+  [[eosio::on_notify("eosio.token::transfer")]] void payeos(
+      name from, name to, asset quantity, string memo);
+
+  /**
    * Get master token id of a given layer token.
    * If token is master, `master_token_id` is equal to its `id`.
    * @param token_id - Token unique id
@@ -103,57 +128,11 @@ public:
     return layer_tokens;
   }
 
-  /**
-   * Get symbol code of token with specified `id`.
-   *
-   * @param contract - Account name of contract
-   * @param token_id - Unique ID of the token
-   */
-  static symbol_code get_symbol(name contract, id_type token_id) {
-    token_index tokens(contract, contract.value);
-    auto it = tokens.find(token_id);
-    if (it == tokens.end()) {
-      return symbol_code{};
-    } else {
-      return it->value.symbol.code();
-    }
-  }
-
-  /**
-   * Get balance of token with specified symbol code.
-   *
-   * @param contract - Account name of contract
-   * @param owner - Token owner
-   * @param sym_code - Token symbol code
-   */
-  static asset get_balance(name contract, name owner, symbol_code sym_code) {
-    account_index acnts(contract, owner.value);
-    auto t = acnts.find(sym_code.raw());
-    if (t == acnts.end()) {
-      return asset(0, symbol(sym_code, 0));
-    } else {
-      return t->balance;
-    }
-  }
-
   name get_issuer(symbol_code sym) {
     stat_index stat(get_self(), get_self().value);
     auto info =
         stat.get(sym.raw(), "token stat not found, please create first");
     return info.issuer;
-  }
-
-  /**
-   * Get token owner
-   */
-  name get_owner_by_uuid(global_id uuid) {
-    auto index = tokens.get_index<"byuuid"_n>();
-    auto it = index.find(uuid);
-    if (it == index.end()) {
-      return name{};
-    } else {
-      return it->owner;
-    }
   }
 
   name get_owner_by_id(id_type token_id) {
@@ -162,16 +141,6 @@ public:
       return name{};
     } else {
       return it->owner;
-    }
-  }
-
-  asset get_balance(name owner) {
-    account_index acnts(get_self(), owner.value);
-    auto it = acnts.find(owner.value);
-    if (it == acnts.end()) {
-      return asset{};
-    } else {
-      return it->balance;
     }
   }
 
@@ -235,6 +204,19 @@ public:
     id_type get_master_id() const { return master_token_id; }
   };
 
+  TABLE auction {
+    // token id
+    id_type id;
+    // top bidder
+    name bidder;
+    // current bid price
+    asset curr_price;
+    // auction status. 0 auction. 1 end.
+    int status;
+
+    id_type primary_key() const { return id; }
+  };
+
   using control_token_table =
       multi_index<name("ctltokens"), controltoken,
                   indexed_by<name("bymasterid"),
@@ -256,6 +238,8 @@ public:
       indexed_by<"bysymbol"_n,
                  const_mem_fun<token, uint64_t, &token::get_symbol>>>;
 
+  using auction_index = multi_index<"auction"_n, auction>;
+
   // generated token global uuid based on token id and
   // contract name, passed in the argument
   global_id get_global_id(name contract, id_type id) const {
@@ -263,20 +247,6 @@ public:
     uint128_t id_128 = static_cast<uint128_t>(id);
     uint128_t res = (self_128 << 64) | (id_128);
     return res;
-  }
-
-  string uuid_to_string(global_id uuid) {
-    const char *charmap = "0123456789";
-    string result;
-    result.reserve(40); // max. 40 digits possible ( uint64_t has 20)
-    uint128_t helper = uuid;
-
-    do {
-      result += charmap[helper % 10];
-      helper /= 10;
-    } while (helper);
-    std::reverse(result.begin(), result.end());
-    return result;
   }
 
 private:
@@ -302,6 +272,4 @@ private:
    */
   id_type _safemint(name to, string symbol, string uri, string memo);
   id_type _mint(name owner, asset value, string uri);
-
-  void verify_uri(string uri);
 };
