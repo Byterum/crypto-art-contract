@@ -96,12 +96,21 @@ public:
   void bid(name bidder, id_type token_id, asset price);
 
   /**
+   * Add qualification of bidding with one time.
+   * @param bidder - Token bidder account
+   */
+  void addbidqual(name bidder, asset quantity);
+
+  /**
    * Accept the final bid and sell token.
    * @param token_id - Token unique id
    */
   ACTION acceptbid(id_type token_id);
 
   [[eosio::on_notify("eosio.token::transfer")]] void payeos(
+      name from, name to, asset quantity, string memo);
+
+  [[eosio::on_notify("pandaheroast::transfer")]] void paypdh(
       name from, name to, asset quantity, string memo);
 
   /**
@@ -146,10 +155,16 @@ public:
 
   TABLE account {
     asset balance; // DON'T MODIFIED.
-
     // You can add more fields here...
 
     uint64_t primary_key() const { return balance.symbol.code().raw(); }
+  };
+
+  TABLE bid_qualification {
+    name owner;
+    uint64_t avail_bid_time; // available bid time
+
+    uint64_t primary_key() const { return owner.value; }
   };
 
   TABLE stat {
@@ -239,6 +254,8 @@ public:
                  const_mem_fun<token, uint64_t, &token::get_symbol>>>;
 
   using auction_index = multi_index<"auction"_n, auction>;
+
+  using bid_qual = multi_index<"bidqual"_n, bid_qualification>;
 
   // generated token global uuid based on token id and
   // contract name, passed in the argument

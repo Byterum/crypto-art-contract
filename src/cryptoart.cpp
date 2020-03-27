@@ -321,6 +321,13 @@ ACTION cryptoart::auctiontoken(id_type token_id, asset min_price) {
 }
 
 void cryptoart::bid(name bidder, id_type token_id, asset price) {
+  // check qualification and cost 1 time.
+  bid_qual qual(get_self(), bidder.value);
+  const auto &info =
+      qual.get(bidder.value, "bidder has no qualification to bid");
+  check(info.avail_bid_time, "bidder has no qualification to bid");
+  qual.modify(info, same_payer, [&](auto &r) { r.avail_bid_time -= 1; });
+  // modify current bidder and price.
   auction_index auction(get_self(), get_self().value);
   const auto &record = auction.get(token_id, "token is not in auction");
   check(price > record.curr_price,
@@ -350,4 +357,41 @@ ACTION cryptoart::acceptbid(id_type token_id) {
   }
   // transfer artwork
   tokens.modify(token, token.owner, [&](auto &r) { r.owner = record.bidder; });
+}
+
+void cryptoart::paypdh(name from, name to, asset quantity, string memo) {
+  if (to != get_self()) {
+    print("receiver should be the contract account");
+    return;
+  }
+  if (from == to) {
+    print("cannot pay to self");
+    return;
+  };
+  if (quantity.symbol != symbol("PDH", 4)) {
+    print("only accept PDH");
+    return;
+  }
+  // memo format is "auction:${token_id}"
+  size_t div_pos = memo.find(":");
+  string type = memo.substr(0, div_pos);
+  id_type token_id = atoll(memo.substr(div_pos + 1, memo.size()).c_str());
+  if (type == "bid") {
+    addbidqual(from, quantity);
+  }
+}
+
+void cryptoart::addbidqual(name bidder, asset quantity) {
+  // only for test. Prod env is 1000.0000 PDH.
+  check(quantity.amount > 10000, "amount should be larger than 1.0000 PDH");
+  bid_qual qual(get_self(), bidder.value);
+  auto itr = qual.find(bidder.value);
+  if (itr == qual.end()) {
+    qual.emplace(get_self(), [&](auto &r) {
+      r.owner = bidder;
+      r.avail_bid_time = 1;
+    });
+  } else {
+    qual.modify(itr, same_payer, [&](auto &r) { r.avail_bid_time += 1; });
+  }
 }

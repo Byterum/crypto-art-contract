@@ -73,6 +73,20 @@
             ]
         },
         {
+            "name": "bid_qualification",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "avail_bid_time",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "burn",
             "base": "",
             "fields": [
@@ -343,6 +357,13 @@
         {
             "name": "auction",
             "type": "auction",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "bidqual",
+            "type": "bid_qualification",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
