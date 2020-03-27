@@ -23,10 +23,10 @@ This action will issue NFTs to the specifed account, and after issuing, token ho
 
 At mobius crypto art, **we force all artworks only support IPFS storage network** to make more **decentralized**. The upper layers can also cache the buffer from IPFS for more efficient loading.
 
-- For `NORMAL` artwork, the valid uri format is `mobius://crypto.art/ART/normal/ipfs/${cid}`.
-- For `PROGRAM` artwork, the valid uri format is below:
-  - Master Token: `mobius://crypto.art/ART/programmable/ipfs/${cid}`
-  - Layer Token: `mobius://crypto.art/ART/programmable?master=${master_token_id}`, which will be generated automatically when mint artwork.
+The valid uri format follows:
+
+- Master Token: `mobius://crypto.art/ART/master?ipfs=${cid}`
+- Layer Token: `mobius://crypto.art/ART/layer?master=${master_token_id}`, which will be generated automatically when mint artwork.
 
 ### 3. Call `setuptoken` to setup the control token
 
