@@ -4,7 +4,7 @@ Crypto and programmable artwork, using non-fungible token to represent and relea
 
 Inspired by [async.art](https://async.art/).
 
-## How to use
+## How to mint artwork
 
 ### 1. Create two basic artwork token symbol
 
@@ -41,6 +41,27 @@ We map layer token id as the index of value array of master token.
 ### 4. Call `updatetoken` to update current value of your layer token
 
 After setup tokens, you can also update current value of each layer token you hold. **This will make effect on the final artwork.**
+
+## How to bid artwork
+
+### 0. Token holders call `auctiontoken` to make token auctionable.
+
+Artists need to add their tokens to auction list and set a specific end time. Artist can also accept any current prices from bidders before the auction ends by calling `acceptbid`. If do so, the auction will be closed in advance.
+
+### 1. Pay by PDH and get the qualification of bidding.
+
+To get the qualification of bidding, you need to transfer a special token `PDH` to artwork contract account to get 1 chance of bidding.
+
+### 2. 3rd-party call `bid` to bid the token.
+
+Users that are interested in this artwork token can bid it. Each bidding will charge 1 chance as bidding qualification, and will give price larger than those before.
+
+### 3. Make auction end and transfer tokens by calling `auctionend` or `acceptbid`.
+
+We have two ways to end an auction and trigger token transferring:
+
+- Token holders can call `acceptbid` to accept the final price.
+- Bidders can call `auctionend` only after auction ends.
 
 ## License
 

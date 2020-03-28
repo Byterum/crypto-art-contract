@@ -53,8 +53,26 @@
                     "type": "asset"
                 },
                 {
+                    "name": "latest_bid_time",
+                    "type": "int64"
+                },
+                {
+                    "name": "end_time",
+                    "type": "int64"
+                },
+                {
                     "name": "status",
                     "type": "int32"
+                }
+            ]
+        },
+        {
+            "name": "auctionend",
+            "base": "",
+            "fields": [
+                {
+                    "name": "token_id",
+                    "type": "id_type"
                 }
             ]
         },
@@ -69,6 +87,10 @@
                 {
                     "name": "min_price",
                     "type": "asset"
+                },
+                {
+                    "name": "duration",
+                    "type": "int64"
                 }
             ]
         },
@@ -151,6 +173,11 @@
                     "type": "asset"
                 }
             ]
+        },
+        {
+            "name": "easeauction",
+            "base": "",
+            "fields": []
         },
         {
             "name": "mintartwork",
@@ -306,6 +333,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "auctionend",
+            "type": "auctionend",
+            "ricardian_contract": ""
+        },
+        {
             "name": "auctiontoken",
             "type": "auctiontoken",
             "ricardian_contract": ""
@@ -318,6 +350,11 @@
         {
             "name": "create",
             "type": "create",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "easeauction",
+            "type": "easeauction",
             "ricardian_contract": ""
         },
         {

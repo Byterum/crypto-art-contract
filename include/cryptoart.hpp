@@ -84,8 +84,9 @@ public:
   holder.
    * @param token_id - Token unique id
    * @param min_price - Minimum price
+   * @param duration - Valid auction duration in seconds
    */
-  ACTION auctiontoken(id_type token_id, asset min_price);
+  ACTION auctiontoken(id_type token_id, asset min_price, int64_t duration);
 
   /**
    * Bid a control token. Internal function
@@ -100,6 +101,14 @@ public:
    * @param bidder - Token bidder account
    */
   void addbidqual(name bidder, asset quantity);
+
+  /**
+   * Trigger auction ending if reach end_time.
+   * @param token_id - Token unique id
+   */
+  ACTION auctionend(id_type token_id);
+
+  ACTION easeauction();
 
   /**
    * Accept the final bid and sell token.
@@ -226,6 +235,10 @@ public:
     name bidder;
     // current bid price
     asset curr_price;
+    // latest timestamp of bidding
+    int64_t latest_bid_time;
+    // auction end timestamp in seconds
+    int64_t end_time;
     // auction status. 0 auction. 1 end.
     int status;
 
@@ -289,4 +302,6 @@ private:
    */
   id_type _safemint(name to, string symbol, string uri, string memo);
   id_type _mint(name owner, asset value, string uri);
+
+  int64_t now() { return current_time_point().time_since_epoch().to_seconds(); }
 };

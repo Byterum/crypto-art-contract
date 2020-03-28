@@ -294,12 +294,14 @@ void cryptoart::payeos(name from, name to, asset quantity, string memo) {
   }
 }
 
-ACTION cryptoart::auctiontoken(id_type token_id, asset min_price) {
+ACTION cryptoart::auctiontoken(id_type token_id, asset min_price,
+                               int64_t duration) {
   name owner = get_owner_by_id(token_id);
   // require auth of token owner.
   require_auth(owner);
   check(min_price.amount > 0, "minimum bid price should be positive");
   check(min_price.symbol == symbol("EOS", 4), "only support EOS token");
+  // now timestamp in seconds.
   auction_index auction(get_self(), get_self().value);
   auto itr = auction.find(token_id);
   if (itr == auction.end()) {
@@ -308,6 +310,7 @@ ACTION cryptoart::auctiontoken(id_type token_id, asset min_price) {
       r.id = token_id;
       r.bidder = owner;
       r.curr_price = min_price;
+      r.end_time = now() + duration;
       r.status = 0;
     });
   } else if (itr->status == 1) {
@@ -315,6 +318,7 @@ ACTION cryptoart::auctiontoken(id_type token_id, asset min_price) {
     auction.modify(itr, owner, [&](auto &r) {
       r.bidder = owner;
       r.curr_price = min_price;
+      r.end_time = now() + duration;
       r.status = 0;
     });
   }
@@ -327,14 +331,18 @@ void cryptoart::bid(name bidder, id_type token_id, asset price) {
       qual.get(bidder.value, "bidder has no qualification to bid");
   check(info.avail_bid_time, "bidder has no qualification to bid");
   qual.modify(info, same_payer, [&](auto &r) { r.avail_bid_time -= 1; });
+  int64_t now_seconds = now();
   // modify current bidder and price.
   auction_index auction(get_self(), get_self().value);
   const auto &record = auction.get(token_id, "token is not in auction");
+  check(record.status == 0 && record.end_time > now_seconds,
+        "auction has closed");
   check(price > record.curr_price,
         "bid value should be larger than current price");
   auction.modify(record, same_payer, [&](auto &r) {
     r.bidder = bidder;
     r.curr_price = price;
+    r.latest_bid_time = now_seconds;
   });
 }
 
@@ -344,9 +352,15 @@ ACTION cryptoart::acceptbid(id_type token_id) {
   require_auth(token.owner);
   auction_index auction(get_self(), get_self().value);
   const auto &record = auction.get(token_id, "token is not in auction");
-  check(record.status == 0, "auction is closed");
+  check(record.status == 0, "auction has closed");
   // close the auction.
-  auction.modify(record, same_payer, [&](auto &r) { r.status = 1; });
+  int64_t now_seconds = now();
+  auction.modify(record, same_payer, [&](auto &r) {
+    r.status = 1;
+    if (now_seconds < r.end_time) {
+      r.end_time = now_seconds;
+    }
+  });
   // transfer EOS to token owner.
   if (token.owner != get_self()) {
     action(permission_level(get_self(), "active"_n), "eosio.token"_n,
@@ -393,5 +407,39 @@ void cryptoart::addbidqual(name bidder, asset quantity) {
     });
   } else {
     qual.modify(itr, same_payer, [&](auto &r) { r.avail_bid_time += 1; });
+  }
+}
+
+ACTION cryptoart::auctionend(id_type token_id) {
+  auction_index auction(get_self(), get_self().value);
+  const auto &record = auction.get(token_id, "auction of token not found");
+  // only top bidder can trigger this action.
+  require_auth(record.bidder);
+  check(record.status == 0, "auction has closed");
+  check(record.end_time < now(),
+        "auction cannot be ended before the pre-defined end time");
+  // close the auction.
+  auction.modify(record, same_payer, [&](auto &r) { r.status = 1; });
+  const auto &token = tokens.get(token_id, "token not found");
+  // transfer EOS to token owner.
+  if (token.owner != get_self()) {
+    action(permission_level(get_self(), "active"_n), "eosio.token"_n,
+           "transfer"_n,
+           make_tuple(get_self(), token.owner, record.curr_price,
+                      string("acceptbid")))
+        .send();
+  }
+  // transfer artwork
+  tokens.modify(token, record.bidder,
+                [&](auto &r) { r.owner = record.bidder; });
+}
+
+ACTION cryptoart::easeauction() {
+  require_auth(get_self());
+  auction_index acc(get_self(), get_self().value);
+  auto itr = acc.begin();
+  while (itr != acc.end()) {
+    acc.erase(itr);
+    itr++;
   }
 }
