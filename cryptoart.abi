@@ -127,6 +127,11 @@
             ]
         },
         {
+            "name": "clearauction",
+            "base": "",
+            "fields": []
+        },
+        {
             "name": "controltoken",
             "base": "",
             "fields": [
@@ -173,11 +178,6 @@
                     "type": "asset"
                 }
             ]
-        },
-        {
-            "name": "easeauction",
-            "base": "",
-            "fields": []
         },
         {
             "name": "mintartwork",
@@ -348,13 +348,13 @@
             "ricardian_contract": ""
         },
         {
-            "name": "create",
-            "type": "create",
+            "name": "clearauction",
+            "type": "clearauction",
             "ricardian_contract": ""
         },
         {
-            "name": "easeauction",
-            "type": "easeauction",
+            "name": "create",
+            "type": "create",
             "ricardian_contract": ""
         },
         {

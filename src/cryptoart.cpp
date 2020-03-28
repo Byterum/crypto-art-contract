@@ -435,12 +435,11 @@ ACTION cryptoart::auctionend(id_type token_id) {
                 [&](auto &r) { r.owner = record.bidder; });
 }
 
-ACTION cryptoart::easeauction() {
+ACTION cryptoart::clearauction() {
   require_auth(get_self());
   auction_index acc(get_self(), get_self().value);
   auto itr = acc.begin();
   while (itr != acc.end()) {
-    acc.erase(itr);
-    itr++;
+    itr = acc.erase(itr);
   }
 }

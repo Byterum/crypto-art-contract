@@ -108,7 +108,7 @@ public:
    */
   ACTION auctionend(id_type token_id);
 
-  ACTION easeauction();
+  ACTION clearauction();
 
   /**
    * Accept the final bid and sell token.
