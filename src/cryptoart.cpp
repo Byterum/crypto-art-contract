@@ -313,7 +313,8 @@ ACTION cryptoart::auctiontoken(id_type token_id, asset min_price,
       r.end_time = now() + duration;
       r.status = 0;
     });
-  } else if (itr->status == 1) {
+  } else {
+    check(itr->status == 1, "auction is going");
     // if not first auction, reopen auction.
     auction.modify(itr, owner, [&](auto &r) {
       r.bidder = owner;
