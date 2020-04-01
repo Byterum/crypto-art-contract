@@ -47,7 +47,7 @@ public:
    * @param uuid - Global ID of the token to burn
    * @param memo - Action memo. Maximum 256 bytes
    */
-  ACTION burn(name owner, global_id uuid, string memo);
+  // ACTION burn(name owner, global_id uuid, string memo);
 
   ACTION setrampayer(name payer, id_type id);
   /**
@@ -109,6 +109,7 @@ public:
   ACTION auctionend(id_type token_id);
 
   ACTION clearauction();
+  ACTION cleartokens();
 
   /**
    * Accept the final bid and sell token.
@@ -215,7 +216,7 @@ public:
     // num of levers
     uint64_t levers_num;
     // is token setup
-    bool isSetup;
+    bool is_setup;
     // master token id of the layer token
     // if it's master token, equal to the token id
     id_type master_token_id;

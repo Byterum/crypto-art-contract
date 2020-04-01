@@ -109,25 +109,12 @@
             ]
         },
         {
-            "name": "burn",
+            "name": "clearauction",
             "base": "",
-            "fields": [
-                {
-                    "name": "owner",
-                    "type": "name"
-                },
-                {
-                    "name": "uuid",
-                    "type": "global_id"
-                },
-                {
-                    "name": "memo",
-                    "type": "string"
-                }
-            ]
+            "fields": []
         },
         {
-            "name": "clearauction",
+            "name": "cleartokens",
             "base": "",
             "fields": []
         },
@@ -144,7 +131,7 @@
                     "type": "uint64"
                 },
                 {
-                    "name": "isSetup",
+                    "name": "is_setup",
                     "type": "bool"
                 },
                 {
@@ -343,13 +330,13 @@
             "ricardian_contract": ""
         },
         {
-            "name": "burn",
-            "type": "burn",
+            "name": "clearauction",
+            "type": "clearauction",
             "ricardian_contract": ""
         },
         {
-            "name": "clearauction",
-            "type": "clearauction",
+            "name": "cleartokens",
+            "type": "cleartokens",
             "ricardian_contract": ""
         },
         {

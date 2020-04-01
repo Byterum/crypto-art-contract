@@ -129,23 +129,23 @@ ACTION cryptoart::setrampayer(name payer, id_type id) {
   add_balance(payer, st.value, payer);
 }
 
-ACTION cryptoart::burn(name owner, global_id uuid, string memo) {
-  require_auth(owner);
+// ACTION cryptoart::burn(name owner, global_id uuid, string memo) {
+//   require_auth(owner);
 
-  // Find token to burn
-  auto uuid_index = tokens.get_index<"byuuid"_n>();
-  const auto &burn_token = uuid_index.get(uuid, "token with id does not exist");
-  check(burn_token.owner == owner, "token not owned by account");
+//   // Find token to burn
+//   auto uuid_index = tokens.get_index<"byuuid"_n>();
+//   const auto &burn_token = uuid_index.get(uuid, "token with id does not
+//   exist"); check(burn_token.owner == owner, "token not owned by account");
 
-  asset burnt_supply = burn_token.value;
+//   asset burnt_supply = burn_token.value;
 
-  // Remove token from tokens table
-  tokens.erase(burn_token);
-  // Lower balance from owner
-  sub_balance(owner, burnt_supply);
-  // Lower supply from currency
-  sub_supply(burnt_supply);
-}
+//   // Remove token from tokens table
+//   tokens.erase(burn_token);
+//   // Lower balance from owner
+//   sub_balance(owner, burnt_supply);
+//   // Lower supply from currency
+//   sub_supply(burnt_supply);
+// }
 
 void cryptoart::sub_balance(name owner, asset value) {
   account_index from_acnts(get_self(), owner.value);
@@ -207,10 +207,10 @@ ACTION cryptoart::setuptoken(id_type token_id, vector<int64_t> min_values,
   auto levers_num = min_values.size();
   // get the token that is not setup
   const auto &token = control_tokens.get(token_id, "token not found");
-  check(token.isSetup == false, "token was setup");
+  check(token.is_setup == false, "token was setup");
   // modify token structure to setup initial values
   control_tokens.modify(token, same_payer, [&](auto &r) {
-    r.isSetup = true;
+    r.is_setup = true;
     r.levers_num = levers_num;
     r.min_values = min_values;
     r.max_values = max_values;
@@ -229,7 +229,7 @@ ACTION cryptoart::mintartwork(name to, string uri, vector<name> collaborators) {
     r.id = master_token_id;
     r.master_token_id = master_token_id;
     r.levers_num = 0;
-    r.isSetup = true;
+    r.is_setup = true;
   });
   // issue layer token to initial collaborators
   for (int i = 0; i < collaborators.size(); i++) {
@@ -240,7 +240,7 @@ ACTION cryptoart::mintartwork(name to, string uri, vector<name> collaborators) {
                                  string(""));
     control_tokens.emplace(issuer, [&](auto &r) {
       r.id = token_id;
-      r.isSetup = false;
+      r.is_setup = false;
       r.master_token_id = master_token_id;
     });
   }
@@ -254,7 +254,7 @@ ACTION cryptoart::updatetoken(id_type token_id, vector<int64_t> lever_ids,
   check(lever_ids.size() == new_values.size(),
         "length of lever_ids should be equal to new_values");
   const auto &token = control_tokens.get(token_id, "token not found");
-  check(token.isSetup, "token is not setup");
+  check(token.is_setup, "token is not setup");
   vector<int64_t> values = token.curr_values;
   for (int i = 0; i < lever_ids.size(); i++) {
     int lever_id = lever_ids[i];
@@ -441,5 +441,18 @@ ACTION cryptoart::clearauction() {
   auto itr = acc.begin();
   while (itr != acc.end()) {
     itr = acc.erase(itr);
+  }
+}
+
+ACTION cryptoart::cleartokens() {
+  require_auth(get_self());
+  auto itr = control_tokens.begin();
+  while (itr != control_tokens.end()) {
+    itr = control_tokens.erase(itr);
+  }
+
+  auto itr2 = tokens.begin();
+  while (itr2 != tokens.end()) {
+    itr2 = tokens.erase(itr2);
   }
 }
