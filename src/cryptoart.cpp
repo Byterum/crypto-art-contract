@@ -33,7 +33,8 @@ ACTION cryptoart::create(name issuer, asset max_supply) {
   });
 }
 
-id_type cryptoart::_safemint(name to, string symbol, string uri, string memo) {
+id_type cryptoart::_safemint(id_type token_id, name to, string symbol,
+                             string uri, string memo) {
   check(is_account(to), "to account does not exist");
   // e,g, Get EOS from 3 EOS
   auto sym = eosio::symbol(symbol.c_str(), 0);
@@ -56,8 +57,15 @@ id_type cryptoart::_safemint(name to, string symbol, string uri, string memo) {
   add_supply(quantity);
   // Add balance to account
   add_balance(to, quantity, to);
-  // Mint nfts
-  return _mint(to, asset(1, sym), uri);
+  // Mint nfts. Issuer will pay for RAM
+  tokens.emplace(get_issuer(sym.code()), [&](auto &token) {
+    token.id = token_id;
+    token.uuid = get_global_id(get_self(), token_id);
+    token.uri = uri;
+    token.owner = to;
+    token.value = asset(1, sym);
+  });
+  return token_id;
 }
 
 ACTION cryptoart::transfer(name from, name to, id_type token_id, string memo) {
@@ -86,19 +94,6 @@ ACTION cryptoart::transfer(name from, name to, id_type token_id, string memo) {
   // Change balance of both accounts
   sub_balance(from, st.value);
   add_balance(to, st.value, from);
-}
-
-id_type cryptoart::_mint(name owner, asset value, string uri) {
-  id_type token_id = tokens.available_primary_key();
-  // Add token with creator paying for RAM
-  tokens.emplace(get_issuer(value.symbol.code()), [&](auto &token) {
-    token.id = token_id;
-    token.uuid = get_global_id(get_self(), token_id);
-    token.uri = uri;
-    token.owner = owner;
-    token.value = value;
-  });
-  return token_id;
 }
 
 ACTION cryptoart::setrampayer(name payer, id_type id) {
@@ -218,12 +213,13 @@ ACTION cryptoart::setuptoken(id_type token_id, vector<int64_t> min_values,
   });
 }
 
-ACTION cryptoart::mintartwork(name to, string uri, vector<name> collaborators) {
+ACTION cryptoart::mintartwork(id_type master_token_id, name to, string uri,
+                              vector<name> collaborators) {
   name issuer = get_issuer(symbol_code(art_symbol));
   require_auth(issuer);
   // issue master layer token
-  id_type master_token_id = _safemint(
-      to, art_symbol, "mobius://crypto.art/ART/master?ipfs=" + uri, string(""));
+  _safemint(master_token_id, to, art_symbol,
+            "mobius://crypto.art/ART/master?ipfs=" + uri, string(""));
   control_tokens.emplace(issuer, [&](auto &r) {
     // `token_id` and `master_token_id` are the same in master token
     r.id = master_token_id;
@@ -234,12 +230,13 @@ ACTION cryptoart::mintartwork(name to, string uri, vector<name> collaborators) {
   // issue layer token to initial collaborators
   for (int i = 0; i < collaborators.size(); i++) {
     name collaborator = collaborators[i];
-    id_type token_id = _safemint(collaborator, art_symbol,
-                                 "mobius://crypto.art/ART/layer?master=" +
-                                     to_string(master_token_id),
-                                 string(""));
+    id_type available_id = master_token_id + i + 1;
+    _safemint(available_id, collaborator, art_symbol,
+              "mobius://crypto.art/ART/layer?master=" +
+                  to_string(master_token_id),
+              string(""));
     control_tokens.emplace(issuer, [&](auto &r) {
-      r.id = token_id;
+      r.id = available_id;
       r.is_setup = false;
       r.master_token_id = master_token_id;
     });
@@ -314,12 +311,14 @@ ACTION cryptoart::auctiontoken(id_type token_id, asset min_price,
       r.status = 0;
     });
   } else {
-    check(itr->status == 1, "auction is going");
+    auto curr_time = now();
+    check(itr->status == 1 || itr->end_time < curr_time,
+          "auction is going without expire");
     // if not first auction, reopen auction.
     auction.modify(itr, owner, [&](auto &r) {
       r.bidder = owner;
       r.curr_price = min_price;
-      r.end_time = now() + duration;
+      r.end_time = curr_time + duration;
       r.status = 0;
     });
   }

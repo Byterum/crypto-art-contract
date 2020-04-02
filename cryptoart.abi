@@ -171,6 +171,10 @@
             "base": "",
             "fields": [
                 {
+                    "name": "token_id",
+                    "type": "id_type"
+                },
+                {
                     "name": "to",
                     "type": "name"
                 },

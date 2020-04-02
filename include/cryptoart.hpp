@@ -63,12 +63,14 @@ public:
   /**
    * Mint master layer of art work to `to` and multiple layer tokens to
    * given collaborators.
+   * @param token_id - Available master token id.
    * @param to - Target artist holding the master layer
    * @param uri - URI for master layer. e.g. url of image
    * @param collaborators - Collaborate artists holding multiple layer
    * tokens. Zero means normal crypto art. Non-zero means programmable art.
    */
-  ACTION mintartwork(name to, string uri, vector<name> collaborators);
+  ACTION mintartwork(id_type token_id, name to, string uri,
+                     vector<name> collaborators);
 
   /**
    * Update current value of a token with given lever ids.
@@ -295,14 +297,14 @@ private:
    * account name "to".
    * Each token is generated with an unique token_id asiigned to it, and a URI
    * format string.
-   *
+   * @param token_id - Avaliable master token id
    * @param to - Issuer of the token
    * @param symbol - Token symbol
    * @param uri - URI string of token. Seed the RFC 3986
    * @param memo - Action memo. Maximum 256 bytes
    */
-  id_type _safemint(name to, string symbol, string uri, string memo);
-  id_type _mint(name owner, asset value, string uri);
+  id_type _safemint(id_type token_id, name to, string symbol, string uri,
+                    string memo);
 
   int64_t now() { return current_time_point().time_since_epoch().to_seconds(); }
 };
