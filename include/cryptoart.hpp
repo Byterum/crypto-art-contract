@@ -101,8 +101,10 @@ public:
   /**
    * Add qualification of bidding with one time.
    * @param bidder - Token bidder account
+   * @param quantity - PDH quantity
+   * @param times - Bid times
    */
-  void addbidqual(name bidder, asset quantity);
+  void addbidqual(name bidder, asset quantity, int times);
 
   /**
    * Trigger auction ending if reach end_time.
@@ -285,6 +287,8 @@ public:
 private:
   token_index tokens;
   control_token_table control_tokens;
+  // 1000 PDH for per bid
+  asset price_per_bid = asset(1000 * 10000, symbol("PDH", 4));
 
   string art_symbol = "ART";
 

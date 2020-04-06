@@ -329,7 +329,7 @@ void cryptoart::bid(name bidder, id_type token_id, asset price) {
   bid_qual qual(get_self(), bidder.value);
   const auto &info =
       qual.get(bidder.value, "bidder has no qualification to bid");
-  check(info.avail_bid_time, "bidder has no qualification to bid");
+  check(info.avail_bid_time > 0, "bidder has no qualification to bid");
   qual.modify(info, same_payer, [&](auto &r) { r.avail_bid_time -= 1; });
   int64_t now_seconds = now();
   // modify current bidder and price.
@@ -386,27 +386,26 @@ void cryptoart::paypdh(name from, name to, asset quantity, string memo) {
     print("only accept PDH");
     return;
   }
-  // memo format is "auction:${token_id}"
+  // memo format is "addbid:${time}"
   size_t div_pos = memo.find(":");
   string type = memo.substr(0, div_pos);
-  id_type token_id = atoll(memo.substr(div_pos + 1, memo.size()).c_str());
-  if (type == "bid") {
-    addbidqual(from, quantity);
+  if (type == "addbid") {
+    addbidqual(from, quantity,
+               atoi(memo.substr(div_pos + 1, memo.size()).c_str()));
   }
 }
 
-void cryptoart::addbidqual(name bidder, asset quantity) {
-  // only for test. Prod env is 1000.0000 PDH.
-  check(quantity.amount > 10000, "amount should be larger than 1.0000 PDH");
+void cryptoart::addbidqual(name bidder, asset quantity, int times) {
+  check(quantity > price_per_bid * times, "amount is not enough for add bids");
   bid_qual qual(get_self(), bidder.value);
   auto itr = qual.find(bidder.value);
   if (itr == qual.end()) {
     qual.emplace(get_self(), [&](auto &r) {
       r.owner = bidder;
-      r.avail_bid_time = 1;
+      r.avail_bid_time = times;
     });
   } else {
-    qual.modify(itr, same_payer, [&](auto &r) { r.avail_bid_time += 1; });
+    qual.modify(itr, same_payer, [&](auto &r) { r.avail_bid_time += times; });
   }
 }
 
