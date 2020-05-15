@@ -12,6 +12,11 @@ typedef uint128_t global_id;
 typedef uint64_t id_type;
 typedef string uri_type;
 
+#define STR(x) #x
+#define TO_ACTION(x, y) STR(x::y)
+#define XCONTRACT_N(x) #x##_n
+#define CONTRACT_N(x) XCONTRACT_N(x)
+
 CONTRACT cryptoart : public contract {
 public:
   using contract::contract;
@@ -124,7 +129,7 @@ public:
   [[eosio::on_notify("eosio.token::transfer")]] void payeos(
       name from, name to, asset quantity, string memo);
 
-  [[eosio::on_notify("pandaheroast::transfer")]] void paypdh(
+  [[eosio::on_notify(TO_ACTION(MY_CT_AST, transfer))]] void paypdh(
       name from, name to, asset quantity, string memo);
 
   /**
